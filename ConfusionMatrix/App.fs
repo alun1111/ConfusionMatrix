@@ -9,7 +9,6 @@ module App =
 
     [<EntryPoint>]
     let main argv =
-        let pair = true, false
         let runsWebPart = rest "runs" {
             GetAll = Db.getPairs 
         }
