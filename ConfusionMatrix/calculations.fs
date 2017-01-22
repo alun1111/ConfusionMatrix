@@ -4,15 +4,47 @@
 module Simple =
     open NUnit.Framework
 
-    let add x y = x + y
+    let dualFlags = [true,true;false,false;true,false;false,true;false,false]
+
+    let trueNegative (point: bool * bool) =
+        match point with
+        | false,false -> 1
+        | _ -> 0
+
+    let truePositive (point: bool * bool) =
+        match point with
+        | true,true -> 1
+        | _ -> 0
+
+    let falseNegative (point: bool * bool) =
+        match point with
+        | false,true -> 1
+        | _ -> 0
+
+    let falsePositive (point: bool * bool) =
+        match point with
+        | true,false -> 1
+        | _ -> 0
+
+    let sumOfMatchedTuples matcher = dualFlags |> List.map(fun x -> matcher x) |> List.sum
+    
+    let sumOfTrueNegative = sumOfMatchedTuples trueNegative 
+    let sumOfTruePositive = sumOfMatchedTuples truePositive 
+    let sumOfFalseNegative = sumOfMatchedTuples falseNegative 
+    let sumOfFalsePositive = sumOfMatchedTuples falsePositive 
 
     [<Test>]
-    let ``When 2 is added to 2 expect 4``() = 
-        Assert.AreEqual(add 2 2, 2+2)
-
-    let flags = [1;0;0;0;1;1;]
-    let sumFlags = flags |> List.sumBy (fun i -> i)
+    let ``There should be two true negative``()=
+        Assert.AreEqual(sumOfTrueNegative, 2)
 
     [<Test>]
-    let ``Sum of three ones is 3``() = 
-        Assert.AreEqual(sumFlags, 3)
+    let ``There should be one false positive``()=
+        Assert.AreEqual(sumOfFalsePositive, 1)
+
+    [<Test>]
+    let ``There should be one false negative``()=
+        Assert.AreEqual(sumOfFalseNegative, 1)
+
+    [<Test>]
+    let ``There should be one true positive``()=
+        Assert.AreEqual(sumOfTruePositive, 1)
