@@ -4,47 +4,75 @@
 module Simple =
     open NUnit.Framework
 
-    let dualFlags = [true,true;false,false;true,false;false,true;false,false]
+    let testData = [
+        true,true;
+        false,false;
+        true,false;
+        false,true;
+        false,false
+        true,true;
+        false,false;
+        true,true;
+        true,true;
+        false,false
+        true,false;
+        false,true;
+        false,true;
+        false,false;
+        false,false
+        ]
 
-    let trueNegative (point: bool * bool) =
+    let tn (point: bool * bool) =
         match point with
         | false,false -> 1
         | _ -> 0
 
-    let truePositive (point: bool * bool) =
+    let tp (point: bool * bool) =
         match point with
         | true,true -> 1
         | _ -> 0
 
-    let falseNegative (point: bool * bool) =
+    let fn (point: bool * bool) =
         match point with
         | false,true -> 1
         | _ -> 0
 
-    let falsePositive (point: bool * bool) =
+    let fp (point: bool * bool) =
         match point with
         | true,false -> 1
         | _ -> 0
 
-    let sumOfMatchedTuples matcher = dualFlags |> List.map(fun x -> matcher x) |> List.sum
-    
-    let sumOfTrueNegative = sumOfMatchedTuples trueNegative 
-    let sumOfTruePositive = sumOfMatchedTuples truePositive 
-    let sumOfFalseNegative = sumOfMatchedTuples falseNegative 
-    let sumOfFalsePositive = sumOfMatchedTuples falsePositive 
+    let matchedSums tupleList matcher = tupleList |> List.map(fun tuple -> matcher tuple) |> List.sum
+
+    let precision dataSet =
+        let tp = decimal(matchedSums dataSet tp)
+        let fp = decimal(matchedSums dataSet fp) 
+        System.Math.Round(tp / (tp + fp), 3)
+
+    let recall dataSet =
+        let tp = decimal(matchedSums dataSet tp)
+        let fn = decimal(matchedSums dataSet fn) 
+        System.Math.Round(tp / (tp + fn), 3)
 
     [<Test>]
-    let ``There should be two true negative``()=
-        Assert.AreEqual(sumOfTrueNegative, 2)
+    let ``There should be 6 true negative``()=
+        Assert.AreEqual(6m, decimal(matchedSums testData tn))
 
     [<Test>]
-    let ``There should be one false positive``()=
-        Assert.AreEqual(sumOfFalsePositive, 1)
+    let ``There should be 2 false positive``()=
+        Assert.AreEqual(2m, decimal(matchedSums testData fp))
 
     [<Test>]
-    let ``There should be one false negative``()=
-        Assert.AreEqual(sumOfFalseNegative, 1)
+    let ``There should be 3 false negative``()=
+        Assert.AreEqual(3m, decimal(matchedSums testData fn))
 
     [<Test>]
-    let ``There should be one true positive``()=
-        Assert.AreEqual(sumOfTruePositive, 1)
+    let ``There should be 4 true positive``()=
+        Assert.AreEqual(4m, decimal(matchedSums testData tp))
+
+    [<Test>]
+    let ``The precision should be: 0.667m``()=
+        Assert.AreEqual(0.667m, precision testData)
+    [<Test>]
+    let ``The recall should be: 0.571m``()=
+        Assert.AreEqual(0.571m, recall testData)
